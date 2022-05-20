@@ -40,6 +40,36 @@ async function run() {
         })
 
 
+        // available service api
+        app.get('/available', async (req, res) => {
+            const date = req.query.date || 'May 20, 2022';
+
+            // step 1:  get all services ---------------
+
+            const services = await serviceCollection.find().toArray();
+
+            // step 2: get the booking of that day ------------------
+            const query = { date: date };
+            const bookings = await bookingCollection.find(query).toArray();
+
+            // step 3: for each service, find booking for that service --------------
+            // not recommended way 
+            services.forEach(service => {
+                // b= booking
+                const serviceBooking = bookings.filter(b => b.treatment === service.name);
+                const booked = serviceBooking.map(s => s.slot);   // s= service
+                // service.booked = booked
+                // service.booked = serviceBooking.map(s => s.slot);
+                const available = service.slots.filter(s => !booked.includes(s));
+                service.available = available;
+
+            })
+
+            res.send(services);
+
+        })
+
+
         /**
         * API Naming Convention ----
         * app.get('/booking')   // get all bookings in this collection . ot get more then one or by filter
