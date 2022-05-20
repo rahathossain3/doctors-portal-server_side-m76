@@ -53,10 +53,15 @@ async function run() {
         //send data
         app.post('/booking', async (req, res) => {
             const booking = req.body;
-            //check data existence
+            //check data existence {part 1} {treatment name, date , patient}
             const query = { treatment: booking.treatment, date: booking.date, patient: booking.patient }
+            //find (jodi item same date a thake taile {part-2} )
+            const exists = await bookingCollection.findOne(query);
+            if (exists) {
+                return res.send({ success: false, booking: exists })
+            }
             const result = await bookingCollection.insertOne(booking);
-            res.send(result);
+            return res.send({ success: true, result });
         })
 
 
