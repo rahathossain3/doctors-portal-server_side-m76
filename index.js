@@ -39,31 +39,50 @@ async function run() {
 
         })
 
-
+        //warning 
         // available service api
+        //this is not the proper way to query 
+        // after learning more about mongodb. use aggregate lookup, pipeline, match, group
         app.get('/available', async (req, res) => {
-            const date = req.query.date || 'May 20, 2022';
+            // const date = req.query.date || 'May 20, 2022';
+            const date = req.query.date;
 
             // step 1:  get all services ---------------
-
             const services = await serviceCollection.find().toArray();
 
-            // step 2: get the booking of that day ------------------
+            // step 2: get the booking of that day. output [{},{},{},{},{},{}]
             const query = { date: date };
             const bookings = await bookingCollection.find(query).toArray();
 
-            // step 3: for each service, find booking for that service --------------
-            // not recommended way 
+            // step 3: for each service
             services.forEach(service => {
-                // b= booking
-                const serviceBooking = bookings.filter(b => b.treatment === service.name);
-                const booked = serviceBooking.map(s => s.slot);   // s= service
-                // service.booked = booked
-                // service.booked = serviceBooking.map(s => s.slot);
-                const available = service.slots.filter(s => !booked.includes(s));
-                service.available = available;
+                // step 4: find booking for that service. output [{},{},{},{}]
+                const serviceBookings = bookings.filter(book => book.treatment === service.name)
+                // step 5: select slots for the service bookings:['','','','']
+                const bookedSlots = serviceBookings.map(book => book.slot);
+                // step 6: select those slots that are not in bookedSlots
+                const available = service.slots.filter(slot => !bookedSlots.includes(slot));
+                // step 7: set available slots to make it easier
+                service.slots = available;
 
-            })
+            });
+
+
+
+            // step 3: for each service, find booking for that service --------------
+            // not recommended way -----**
+            /*   services.forEach(service => {
+                  // b= booking
+                  const serviceBooking = bookings.filter(b => b.treatment === service.name);
+                  const booked = serviceBooking.map(s => s.slot);   // s= service
+                  // service.booked = booked
+                  // service.booked = serviceBooking.map(s => s.slot);
+                  const available = service.slots.filter(s => !booked.includes(s));
+                  service.available = available;
+  
+              }) */
+
+
 
             res.send(services);
 
