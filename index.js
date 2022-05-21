@@ -28,6 +28,8 @@ async function run() {
 
         //booking
         const bookingCollection = client.db('doctors_portal').collection('bookings');
+        //user
+        const usersCollection = client.db('doctors_portal').collection('users');
 
         //service collection get all service
         app.get('/service', async (req, res) => {
@@ -38,6 +40,22 @@ async function run() {
             res.send(services)
 
         })
+
+        // users collection 
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            // thakle update, na thakle create
+            const options = { upsert: true };
+
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
+        })
+
 
         //warning 
         // available service api
@@ -95,6 +113,7 @@ async function run() {
         * app.get('/booking/:id') //get a specific booking 
         * app.post('/booking') // add a new booking
         * app.patch('booking/:id') // update selected item
+        * app.put(/booking/:id) // upsert => update (if exists) of insert ( if doesn't exists)
         * app.delete('booking/:id') // deleted selected item
         */
 
