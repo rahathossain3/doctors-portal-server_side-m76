@@ -68,6 +68,13 @@ async function run() {
 
         })
 
+        // get all users
+        app.get('/users', async (req, res) => {
+            const users = await usersCollection.find().toArray();
+            res.send(users)
+        })
+
+
         // users collection and jwt
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -114,23 +121,6 @@ async function run() {
                 service.slots = available;
 
             });
-
-
-
-            // step 3: for each service, find booking for that service --------------
-            // not recommended way -----**
-            /*   services.forEach(service => {
-                  // b= booking
-                  const serviceBooking = bookings.filter(b => b.treatment === service.name);
-                  const booked = serviceBooking.map(s => s.slot);   // s= service
-                  // service.booked = booked
-                  // service.booked = serviceBooking.map(s => s.slot);
-                  const available = service.slots.filter(s => !booked.includes(s));
-                  service.available = available;
-  
-              }) */
-
-
 
             res.send(services);
 
