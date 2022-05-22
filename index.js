@@ -69,9 +69,22 @@ async function run() {
         })
 
         // get all users
-        app.get('/users', async (req, res) => {
+        app.get('/user', verifyJWT, async (req, res) => {
             const users = await usersCollection.find().toArray();
             res.send(users)
+        })
+
+
+        // users Roll  and jwt*********
+        app.put('/user/admin/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: 'admin' },
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            //send data
+            res.send(result)
         })
 
 
